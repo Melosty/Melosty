@@ -4,4 +4,4 @@
 **A lightweight Minecraft: Java Edition Launcher.**
 
 ## Thanks to
-- 忘却的旋律: The man who created the first and the most classic Minecraft launcher in China, which also named 忘却的旋律, I will never play Minecraft if I didn't use his launcher on the Chinese network, so neither other people in that period that Minecraft just entered China for a while. (In that time, Chinese network just start its development for years.) Also, his launcher is my idea to start this whole project. It's a symbol of my sweet childhood.
+- 忘却的旋律: The man who created the first and the most classic Minecraft launcher in China, which was also named 忘却的旋律, I would never have played Minecraft if I hadn't used his launcher on the Chinese network, so neither could other people in that period when Minecraft first entered China. (In that time, the Chinese network had only been developing for a few years.) Also, his launcher is my idea to start this whole project. It's a symbol of my sweet childhood.
