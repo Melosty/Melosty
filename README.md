@@ -1,2 +1,3 @@
 # Melosty
-W.I.P.
+## W.I.P.
+Launch your Minecraft with lost melody.
