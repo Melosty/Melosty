@@ -108,12 +108,5 @@ Window {
                 }
             }
         }
-
-        ToolButton {
-            id: toolButton
-            x: 168
-            y: 2
-            text: qsTr("Tool Button")
-        }
     }
 }
