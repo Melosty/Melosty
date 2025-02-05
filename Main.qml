@@ -108,5 +108,17 @@ Window {
                 }
             }
         }
+
+        Text {
+            id: titleText
+            x: 10
+            y: 10
+            color: "#ffffff"
+            text: qsTr("Melosty")
+            font.pixelSize: 24
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.bold: true
+        }
     }
 }
