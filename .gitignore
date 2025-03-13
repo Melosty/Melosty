@@ -38,6 +38,7 @@ Thumbs.db
 #VSCode
 .vscode/
 .qtc_clangd/
+CMakeCache.txt
 
 # qtcreator generated files
 *.pro.user*
