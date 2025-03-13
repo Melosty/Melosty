@@ -1,0 +1,9 @@
+.gitignore
+.vscode/launch.json
+CMakeLists.txt
+LICENSE
+Main.qml
+Makefile
+Melosty_icon.png
+README.md
+main.cpp
