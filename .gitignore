@@ -38,6 +38,8 @@ Thumbs.db
 #VSCode
 .vscode/
 .qtc_clangd/
+build/
+CMakeFiles/
 CMakeCache.txt
 
 # qtcreator generated files
