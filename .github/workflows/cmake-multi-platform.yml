@@ -33,9 +33,9 @@ jobs:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+          - os: macos-latest
+            c_compiler: gcc
+            cpp_compiler: g++
         exclude:
           - os: windows-latest
             c_compiler: cl
@@ -43,8 +43,14 @@ jobs:
             c_compiler: clang
           - os: ubuntu-latest
             c_compiler: cl
-
+            
     steps:
+    - name: Install Dependencies (Linux)
+      if: runner.os == 'Linux' # 只在 Linux 系统上执行
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libwayland-dev # 替换为你的依赖项
+
     - uses: actions/checkout@v4
 
     - name: Set reusable strings
