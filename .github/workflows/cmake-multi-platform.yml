@@ -25,7 +25,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [gcc]
         include:
           - os: windows-latest
             c_compiler: gcc
@@ -36,20 +36,13 @@ jobs:
           - os: macos-latest
             c_compiler: gcc
             cpp_compiler: g++
-        exclude:
-          - os: windows-latest
-            c_compiler: cl
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
             
     steps:
     - name: Install Dependencies (Linux)
       if: runner.os == 'Linux' # 只在 Linux 系统上执行
       run: |
         sudo apt-get update
-        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev # 替换为你的依赖项
+        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev # 替换为你的依赖项
 
     - uses: actions/checkout@v4
 
