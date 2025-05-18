@@ -49,7 +49,7 @@ jobs:
       if: runner.os == 'Linux' # 只在 Linux 系统上执行
       run: |
         sudo apt-get update
-        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev # 替换为你的依赖项
+        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev # 替换为你的依赖项
 
     - uses: actions/checkout@v4
 
