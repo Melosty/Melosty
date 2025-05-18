@@ -3,7 +3,6 @@
 
 *~
 *.autosave
-*.a
 *.core
 *.moc
 *.o
@@ -23,7 +22,6 @@ tags
 .DS_Store
 .directory
 *.debug
-Makefile*
 *.prl
 *.app
 moc_*.cpp
@@ -34,18 +32,13 @@ Thumbs.db
 *.rc
 /.qmake.cache
 /.qmake.stash
+*.d
 
 #VSCode
 .vscode/
-.qtc_clangd/
 build/
 CMakeFiles/
 CMakeCache.txt
-
-# qtcreator generated files
-*.pro.user*
-*.qbs.user*
-CMakeLists.txt.user*
 
 # xemacs temporary files
 *.flc
@@ -77,7 +70,6 @@ CMakeLists.txt.user*
 
 # Binaries
 # --------
-*.dll
 *.exe
 
 # Directories with generated files
