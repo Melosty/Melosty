@@ -12,7 +12,23 @@ endif()
 project ("Melosty")
 
 # 将源代码添加到此项目的可执行文件。
-add_executable (Melosty "Melosty.cpp" "Melosty.h")
+include_directories(include)
+
+add_subdirectory (include/glfw)
+
+aux_source_directory(include/imgui IMGUI_SRCS)
+
+add_executable (Melosty
+    Melosty.cpp
+
+    glad.c
+
+    ${IMGUI_SRCS}
+)
+
+find_package(OpenGL REQUIRED)
+
+target_link_libraries(Melosty glfw OpenGL::GL)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Melosty PROPERTY CXX_STANDARD 20)
