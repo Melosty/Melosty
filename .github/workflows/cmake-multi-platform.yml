@@ -73,10 +73,18 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --build-config ${{ matrix.build_type }}
 
-    - name: Upload Artifacts
+    - name: Upload Artifacts (Windows)
+      if: runner.os == 'Windows' # 只在 Linux 系统上执行
       uses: actions/upload-artifact@v4 # 使用 upload-artifact Action
       with:
         name: Melosty-${{ matrix.os }}-${{ matrix.build_type }} # Artifact 的名称，包含平台和构建类型信息
         path: build/Release # 替换为你的构建输出文件所在的目录或文件
-        # 例如：path: build/bin 或 path: build/my_executable # Linux/macOS
+        # 例如：path: build\${{ matrix.build_type }}\your_executable.exe # Windows
+
+    - name: Upload Artifacts (Linux, MacOS)
+      if: runner.os != 'Windows' # 只在 Linux 系统上执行
+      uses: actions/upload-artifact@v4 # 使用 upload-artifact Action
+      with:
+        name: Melosty-${{ matrix.os }}-${{ matrix.build_type }} # Artifact 的名称，包含平台和构建类型信息
+        path: build/ # 替换为你的构建输出文件所在的目录或文件
         # 例如：path: build\${{ matrix.build_type }}\your_executable.exe # Windows
