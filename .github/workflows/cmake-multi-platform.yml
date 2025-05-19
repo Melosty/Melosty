@@ -42,7 +42,7 @@ jobs:
       if: runner.os == 'Linux' # 只在 Linux 系统上执行
       run: |
         sudo apt-get update
-        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev # 替换为你的依赖项
+        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev # 替换为你的依赖项
 
     - uses: actions/checkout@v4
 
@@ -74,7 +74,7 @@ jobs:
       run: ctest --build-config ${{ matrix.build_type }}
 
     - name: Upload Artifacts (Windows)
-      if: runner.os == 'Windows' # 只在 Linux 系统上执行
+      if: runner.os == 'Windows' # 只在 Windows 系统上执行
       uses: actions/upload-artifact@v4 # 使用 upload-artifact Action
       with:
         name: Melosty-${{ matrix.os }}-${{ matrix.build_type }} # Artifact 的名称，包含平台和构建类型信息
@@ -82,7 +82,7 @@ jobs:
         # 例如：path: build\${{ matrix.build_type }}\your_executable.exe # Windows
 
     - name: Upload Artifacts (Linux, MacOS)
-      if: runner.os != 'Windows' # 只在 Linux 系统上执行
+      if: runner.os != 'Windows' # 只在 类Unix 系统上执行
       uses: actions/upload-artifact@v4 # 使用 upload-artifact Action
       with:
         name: Melosty-${{ matrix.os }}-${{ matrix.build_type }} # Artifact 的名称，包含平台和构建类型信息
