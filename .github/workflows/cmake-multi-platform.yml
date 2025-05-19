@@ -41,8 +41,9 @@ jobs:
     - name: Install Dependencies (Linux)
       if: runner.os == 'Linux' # 只在 Linux 系统上执行
       run: |
+        sudo apt-get upgrade
         sudo apt-get update
-        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev # 替换为你的依赖项
+        sudo apt-get install -y libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev # 替换为你的依赖项
 
     - uses: actions/checkout@v4
 
