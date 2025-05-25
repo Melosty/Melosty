@@ -80,7 +80,7 @@ jobs:
       uses: actions/upload-artifact@v4 # 使用 upload-artifact Action
       with:
         name: Melosty-${{ matrix.os }}-${{ matrix.build_type }} # Artifact 的名称，包含平台和构建类型信息
-        path: build/ # 替换为你的构建输出文件所在的目录或文件
+        path: build/Melosty.exe # 替换为你的构建输出文件所在的目录或文件
         # 例如：path: build\${{ matrix.build_type }}\your_executable.exe # Windows
 
     - name: Upload Artifacts (Linux, MacOS)
@@ -88,5 +88,5 @@ jobs:
       uses: actions/upload-artifact@v4 # 使用 upload-artifact Action
       with:
         name: Melosty-${{ matrix.os }}-${{ matrix.build_type }} # Artifact 的名称，包含平台和构建类型信息
-        path: build/ # 替换为你的构建输出文件所在的目录或文件
+        path: build/Melosty # 替换为你的构建输出文件所在的目录或文件
         # 例如：path: build\${{ matrix.build_type }}\your_executable.exe # Windows
