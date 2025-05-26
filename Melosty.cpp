@@ -16,6 +16,7 @@
 const std::string MELOSTY_VERSION{"a0.0.1"};
 
 bool windowFocus = true; // 窗口是否有焦点
+bool showWindow = true; // 控制 ImGui(主窗口) 的显示状态
 
 const double TARGET_FPS = 150.0; // 目标帧率
 const double FRAME_TIME = 1.0 / TARGET_FPS; // 每帧所需时间
@@ -95,6 +96,7 @@ int main()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigViewportsNoAutoMerge = true;
+    io.IniFilename = NULL; // 阻止 ImGui 创建或加载 imgui.ini 文件
     std::cout << "ImGui initialized." << std::endl;
 
     // Style
@@ -110,7 +112,7 @@ int main()
 
     // Main Loop
     std::cout << "Melosty " << MELOSTY_VERSION << " startup!" << std::endl;
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window) && showWindow)
     {
         auto currentFrameStartTime = std::chrono::high_resolution_clock::now();
 
@@ -133,7 +135,7 @@ int main()
         // --- Draw ImGui windows ---
 
         // 创建主窗口
-        ImGui::Begin("Melosty", NULL,
+        ImGui::Begin("Melosty", &showWindow,
             ImGuiWindowFlags_NoSavedSettings |
             ImGuiWindowFlags_NoCollapse); // 窗口属性
 
