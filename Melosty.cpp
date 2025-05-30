@@ -1,18 +1,17 @@
 #include "Melosty.h"
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-const std::string MELOSTY_VERSION{"a0.0.1"};
+const std::string MELOSTY_VERSION{ "a0.0.1" };
 
 bool windowFocus = true; // 窗口是否有焦点
-bool showWindow = true; // 控制 ImGui(主窗口) 的显示状态
+bool windowExist = true; // 控制 ImGui(主窗口) 的开关状态
 
 const double TARGET_FPS = 150.0; // 目标帧率
 const double FRAME_TIME = 1.0 / TARGET_FPS; // 每帧所需时间
 
-unsigned int WIDTH{1};
-unsigned int HEIGHT{1};
+int workAreaX, workAreaY, workAreaWidth, workAreaHeight;
+
+unsigned int WIDTH{ 340 };
+unsigned int HEIGHT{ 115 };
 
 void ImGuiShow(ImGuiIO& io, GLFWwindow*& window);
 void ImGuiSetStyle();
@@ -28,7 +27,7 @@ void window_focus_callback(GLFWwindow* window, int focused) {
 
 void glfw_error_callback(int error, const char* description)
 {
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+    fprintf(stderr, "[ERROR DETAIL] GLFW Error %d: %s\n", error, description);
 }
 
 int main()
@@ -37,14 +36,14 @@ int main()
     SetConsoleOutputCP(CP_UTF8);
 #endif
 
-	std::cout << "Melosty Initializing..." << std::endl;
-	glfwSetErrorCallback(glfw_error_callback);
+    std::cout << "[INFO] Melosty Initializing..." << std::endl;
+    glfwSetErrorCallback(glfw_error_callback);
 
     if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
+        std::cerr << "[FATAL ERROR] Failed to initialize GLFW" << std::endl;
         return -1;
     }
-    std::cout << "GLFW initialized." << std::endl;
+    std::cout << "[INFO] GLFW initialized." << std::endl;
 
     // OpenGL hints
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -57,23 +56,41 @@ int main()
 #endif
 
     // Create a GLFW window.
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Melosty", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1, 1, "Melosty", NULL, NULL); // 设置为 0 会导致 GLFW 窗口不能创建
     if (window == NULL) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
+        std::cerr << "[FATAL ERROR] Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
-    std::cout << "Profile is: OpenGL 3.3 Core." << std::endl;
+    std::cout << "[INFO] Profile is: OpenGL 3.3 Core." << std::endl;
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
     // Vsync controler. 1 for on, 0 for off. Note: If enable, it will cause some delay when you move the ImGui window, don't use it!
     glfwSetWindowFocusCallback(window, window_focus_callback); // 注册窗口焦点回调函数
-    std::cout << "Window created." << std::endl;
-    std::cout << "Vsync: Off." << std::endl;
+    std::cout << "[INFO] GLFWInvisibleWindow created." << std::endl;
+    std::cout << "[INFO] Vsync: Off." << std::endl;
+    std::cout << "[INFO] Max fps: " << TARGET_FPS << std::endl;
+
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    if (primaryMonitor) {
+        // 获取除任务栏以外的屏幕分辨率
+
+        glfwGetMonitorWorkarea(primaryMonitor, &workAreaX, &workAreaY, &workAreaWidth, &workAreaHeight);
+
+        std::cout << "[INFO] Primary Monitor Work Area (excluding taskbar/systemUI):" << std::endl;
+        std::cout << "[INFO]   X position: " << workAreaX << std::endl;
+        std::cout << "[INFO]   Y position: " << workAreaY << std::endl;
+        std::cout << "[INFO]   Width: " << workAreaWidth << std::endl;
+        std::cout << "[INFO]   Height: " << workAreaHeight << std::endl;
+    }
+    else {
+        std::cerr << "[FATAL ERROR] Failed to get primary monitor." << std::endl;
+        return -1;
+    }
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
+        std::cerr << "[FATAL ERROR] Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
@@ -87,22 +104,22 @@ int main()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigViewportsNoAutoMerge = true;
     io.IniFilename = NULL; // 阻止 ImGui 创建或加载 imgui.ini 文件
-    std::cout << "ImGui initialized." << std::endl;
+    std::cout << "[INFO] ImGui initialized." << std::endl;
 
     // Style
     ImGuiSetStyle();
 
     // Corresponds to OpenGL 3.3 Core
-    const char* glsl_version = "#version 330"; 
+    const char* glsl_version = "#version 330";
     glsl_version = "#version 330";
 
     // Initialize ImGui's OpenGL backend
     ImGui_ImplGlfw_InitForOpenGL(window, true); // 第一个参数是 GLFW 窗口，第二个参数是启用键盘/鼠标回调
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Main Loop
-    std::cout << "Melosty " << MELOSTY_VERSION << " startup!" << std::endl;
-    while (!glfwWindowShouldClose(window) && showWindow)
+    // --- Main Loop ---
+    std::cout << "[INFO] Melosty " << MELOSTY_VERSION << " startup!" << std::endl;
+    while (!glfwWindowShouldClose(window) && windowExist)
     {
         auto currentFrameStartTime = std::chrono::high_resolution_clock::now();
 
@@ -120,12 +137,14 @@ int main()
         ImGui_ImplOpenGL3_NewFrame(); // ImGui OpenGL 后端新帧 / ImGui OpenGL backend new frame
         ImGui_ImplGlfw_NewFrame(); // ImGui GLFW 后端新帧 / ImGui GLFW backend new frame
         ImGui::NewFrame(); // ImGui 核心新帧 / ImGui core new frame
+        ImGui::SetNextWindowPos(ImVec2(workAreaWidth / 2.0f - WIDTH / 2.0f + workAreaX, workAreaHeight / 2.0f - HEIGHT / 2.0f + workAreaY), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(WIDTH, HEIGHT), ImGuiCond_Appearing); // 启动时设置窗口大小并将窗口居中
 
         // --- 绘制 ImGui 窗口 ---
         // --- Draw ImGui windows ---
 
         // 创建主窗口
-        ImGui::Begin("Melosty", &showWindow,
+        ImGui::Begin("Melosty", &windowExist,
             ImGuiWindowFlags_NoSavedSettings |
             ImGuiWindowFlags_NoCollapse); // 窗口属性
 
@@ -142,33 +161,12 @@ int main()
         // Get draw data
         ImDrawData* draw_data = ImGui::GetDrawData();
 
-        // 获取窗口大小（可能有视网膜屏等因素影响像素密度）
-        // Get framebuffer size (might be affected by retina display etc.)
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h); // 设置视口 / Set viewport
-
-        // 清除颜色缓冲区
-        // Clear color buffer
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT); // 清除颜色缓冲区 / Clear the color buffer
-
         // 调用 ImGui 的 OpenGL 后端渲染绘制数据
         // Call ImGui's OpenGL backend to render the draw data
         ImGui_ImplOpenGL3_RenderDrawData(draw_data);
 
-        // 将焦点转移给 ImGui
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext(); // 备份当前主窗口的 OpenGL 上下文
-            ImGui::UpdatePlatformWindows();      // 更新 ImGui 创建的原生 OS 窗口的状态
-            ImGui::RenderPlatformWindowsDefault(); // 渲染这些原生 OS 窗口
-            glfwMakeContextCurrent(backup_current_context); // 恢复主窗口的 OpenGL 上下文
-        }
-
-        // 交换前后缓冲区 (显示绘制好的图像)
-        // Swap front and back buffers (display the rendered image)
-        glfwSwapBuffers(window);
+        ImGui::UpdatePlatformWindows();      // 更新 ImGui 创建的原生 OS 窗口的状态
+        ImGui::RenderPlatformWindowsDefault(); // 渲染这些原生 OS 窗口
 
         // Manual framerate limiting
         auto currentFrameEndTime = std::chrono::high_resolution_clock::now();
@@ -185,12 +183,14 @@ int main()
     ImGui_ImplOpenGL3_Shutdown(); // 关闭 ImGui OpenGL 后端 / Shutdown ImGui OpenGL backend
     ImGui_ImplGlfw_Shutdown(); // 关闭 ImGui GLFW 后端 / Shutdown ImGui GLFW backend
     ImGui::DestroyContext(); // 销毁 ImGui 上下文 / Destroy ImGui context
+    std::cout << "[INFO] ImGui exited." << std::endl;
 
     // Cleanup GLFW
     glfwDestroyWindow(window); // 销毁窗口 / Destroy window
     glfwTerminate(); // 终止 GLFW / Terminate GLFW
+    std::cout << "[INFO] GLFW exited." << std::endl;
 
-    std::cout << "Melosty exited." << std::endl;
+    std::cout << "[INFO] Melosty exited." << std::endl;
 	return 0;
 }
 
