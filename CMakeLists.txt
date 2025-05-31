@@ -12,11 +12,22 @@ endif()
 project ("Melosty")
 
 # 将源代码添加到此项目的可执行文件。
-include_directories(include)
+include_directories(
+    include
+    include/glfw/include
+    include/tweeny/include
+    module
+)
 
 add_subdirectory (include/glfw)
 
-aux_source_directory(include/imgui IMGUI_SRCS)
+file(GLOB IMGUI_SRCS
+    include/imgui/*.cpp
+)
+
+file(GLOB_RECURSE MODULE_SRCS
+    module/*.cpp
+)
 
 add_executable (Melosty
     Melosty.cpp
@@ -24,14 +35,23 @@ add_executable (Melosty
     glad.c
 
     ${IMGUI_SRCS}
+
+    ${MODULE_SRCS}
 )
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(Melosty glfw OpenGL::GL)
+target_link_libraries(Melosty
+    glfw
+    OpenGL::GL
+)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(Melosty winmm)
+endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET Melosty PROPERTY CXX_STANDARD 20)
+  set_property(TARGET Melosty PROPERTY CXX_STANDARD 17)
 endif()
 
 # TODO: 如有需要，请添加测试并安装目标。
