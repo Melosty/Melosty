@@ -1,4 +1,4 @@
-﻿#include "Melosty.h"
+#include "Melosty.h"
 
 const std::string MELOSTY_VERSION{ "a0.0.1" };
 
@@ -300,11 +300,4 @@ void ImGuiShow(ImGuiIO& io, GLFWwindow*& window) {
     // 设置清屏颜色（ImGui 窗口中的控制）
     // Set clear color (control from ImGui window)
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate); // 帧率信息 / Framerate info
-}
-
-void Doc_ThisIsAnimationEngineExample() {
-    // This Function will never called.
-    // This Function is a temporary documentation for using animationEngine
-    // It will be move to another place later, but for now it will be save here.
-    // Notice: All component from animationEngine are save in this namespace: "animationEngine"
 }
