@@ -28,7 +28,14 @@ add_executable (Melosty
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(Melosty glfw OpenGL::GL)
+target_link_libraries(Melosty
+    glfw
+    OpenGL::GL
+)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(Melosty winmm)
+endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Melosty PROPERTY CXX_STANDARD 20)

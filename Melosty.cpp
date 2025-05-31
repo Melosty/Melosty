@@ -1,23 +1,30 @@
-#include "Melosty.h"
+﻿#include "Melosty.h"
 
 const std::string MELOSTY_VERSION{ "a0.0.1" };
 
 bool windowFocus = true; // 窗口是否有焦点
 bool windowExist = true; // 控制 ImGui(主窗口) 的开关状态
 
-const double TARGET_FPS = 150.0; // 目标帧率
-const double FRAME_TIME = 1.0 / TARGET_FPS; // 每帧所需时间
+double TARGET_FPS; // 目标帧率，在初始化时确认该值
+double FRAME_TIME; // 每帧所需时间，在初始化时确认该值
+
+bool firstLoopState{ true };
 
 int workAreaX, workAreaY, workAreaWidth, workAreaHeight;
 
 unsigned int WIDTH{ 340 };
 unsigned int HEIGHT{ 115 };
 
+void whenFirstLoop(ImGuiPlatformIO& platform_io, ImGuiViewport*& viewport);
+
 void ImGuiShow(ImGuiIO& io, GLFWwindow*& window);
 void ImGuiSetStyle();
 
-void window_focus_callback(GLFWwindow* window, int focused) {
-    if (focused) {
+void checkWindowFocus(ImGuiPlatformIO& platform_io, ImGuiViewport*& viewport) {
+    if (firstLoopState)
+        return;
+    if (platform_io.Platform_GetWindowFocus(viewport))
+    {
         windowFocus = true;
     }
     else {
@@ -30,10 +37,24 @@ void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "[ERROR DETAIL] GLFW Error %d: %s\n", error, description);
 }
 
+#ifdef _WIN32
+void SetSystemTimerResolution(DWORD resolution_ms) {
+    TIMECAPS tc;
+    if (timeGetDevCaps(&tc, sizeof(tc)) == MMSYSERR_NOERROR) {
+        timeBeginPeriod(min(resolution_ms, tc.wPeriodMin)); // 设置更高的计时精度时不能超过硬件支持的值
+    }
+}
+
+void RestoreSystemTimerResolution() {
+    timeEndPeriod(0); // 恢复到默认值。传入 0 会恢复到 timeBeginPeriod 设置的原始值。
+}
+#endif
+
 int main()
 {
 #ifdef _WIN32
-    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8); // 防止控制台输出中文乱码
+    SetSystemTimerResolution(1);
 #endif
 
     std::cout << "[INFO] Melosty Initializing..." << std::endl;
@@ -67,12 +88,12 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
     // Vsync controler. 1 for on, 0 for off. Note: If enable, it will cause some delay when you move the ImGui window, don't use it!
-    glfwSetWindowFocusCallback(window, window_focus_callback); // 注册窗口焦点回调函数
     std::cout << "[INFO] GLFWInvisibleWindow created." << std::endl;
     std::cout << "[INFO] Vsync: Off." << std::endl;
     std::cout << "[INFO] Max fps: " << TARGET_FPS << std::endl;
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
     if (primaryMonitor) {
         // 获取除任务栏以外的屏幕分辨率
 
@@ -83,6 +104,17 @@ int main()
         std::cout << "[INFO]   Y position: " << workAreaY << std::endl;
         std::cout << "[INFO]   Width: " << workAreaWidth << std::endl;
         std::cout << "[INFO]   Height: " << workAreaHeight << std::endl;
+        
+        if (!mode) {
+            std::cerr << "[FATAL ERROR] Failed to get video mode for primary monitor" << std::endl;
+            glfwTerminate();
+            return -1;
+        }
+        std::cout << "[INFO] Primary monitor refresh rate: " << mode->refreshRate << " Hz" << std::endl;
+        
+        TARGET_FPS = (mode->refreshRate) * 2;
+        if (TARGET_FPS > 300)
+            TARGET_FPS = 300;
     }
     else {
         std::cerr << "[FATAL ERROR] Failed to get primary monitor." << std::endl;
@@ -104,6 +136,8 @@ int main()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigViewportsNoAutoMerge = true;
     io.IniFilename = NULL; // 阻止 ImGui 创建或加载 imgui.ini 文件
+    ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+    ImGuiViewport* viewport = nullptr;
     std::cout << "[INFO] ImGui initialized." << std::endl;
 
     // Style
@@ -118,6 +152,7 @@ int main()
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // --- Main Loop ---
+    double FRAME_TIME = 1.0 / TARGET_FPS;
     std::cout << "[INFO] Melosty " << MELOSTY_VERSION << " startup!" << std::endl;
     while (!glfwWindowShouldClose(window) && windowExist)
     {
@@ -127,9 +162,10 @@ int main()
         // Process all pending events
         glfwPollEvents();
 
+        checkWindowFocus(platform_io, viewport);
         if (!windowFocus) {
+            std::this_thread::yield();
             std::this_thread::sleep_for(std::chrono::milliseconds(100)); // pause for a while to save resource
-            continue;
         }
 
         // --- Start the ImGui frame ---
@@ -147,7 +183,7 @@ int main()
         ImGui::Begin("Melosty", &windowExist,
             ImGuiWindowFlags_NoSavedSettings |
             ImGuiWindowFlags_NoCollapse); // 窗口属性
-
+        
         ImGuiShow(io, window);
 
         // 结束当前窗口
@@ -166,15 +202,30 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(draw_data);
 
         ImGui::UpdatePlatformWindows();      // 更新 ImGui 创建的原生 OS 窗口的状态
-        ImGui::RenderPlatformWindowsDefault(); // 渲染这些原生 OS 窗口
+        ImGui::RenderPlatformWindowsDefault(); // 渲染这些原生 OS 窗口   
 
-        // Manual framerate limiting
+        whenFirstLoop(platform_io, viewport);
+
+        // --- Manual framerate limiting ---
         auto currentFrameEndTime = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> frameDuration = currentFrameEndTime - currentFrameStartTime;
         auto targetFrameEndTime = currentFrameStartTime + std::chrono::duration<double>(FRAME_TIME);
-        while (std::chrono::high_resolution_clock::now() < targetFrameEndTime) {
-            // 忙等待，不做任何事情，持续消耗CPU直到时间点
+        std::chrono::duration<double> remaining_time = targetFrameEndTime - currentFrameEndTime;
+
+        if (remaining_time.count() > 0) { // 只有在有剩余时间时才进行休眠/让出
+            // 如果剩余时间明显较长，使用 `sleep_until`
+            // `sleep_until` 通常比 `sleep_for` 更适合用于精确达到目标时间点。
+            double SLEEP_THRESHOLD_MS = 1.0;
+            if (remaining_time.count() * 1000.0 > SLEEP_THRESHOLD_MS) {
+                // 休眠直到目标结束时间前一点点
+                std::this_thread::sleep_until(targetFrameEndTime - std::chrono::milliseconds((long long)(SLEEP_THRESHOLD_MS)));
+            }
+
+            // 对于剩余的短时间，使用带 `yield` 的忙等待来确保精度
+            while (std::chrono::high_resolution_clock::now() < targetFrameEndTime) {
+                std::this_thread::yield(); // 让出 CPU 时间片给其他线程
+            }
         }
+        
     }
 
     // --- Cleanup ---
@@ -191,7 +242,29 @@ int main()
     std::cout << "[INFO] GLFW exited." << std::endl;
 
     std::cout << "[INFO] Melosty exited." << std::endl;
+    RestoreSystemTimerResolution();
 	return 0;
+}
+
+void whenFirstLoop(ImGuiPlatformIO& platform_io, ImGuiViewport*& viewport) {
+    // 遍历 ImGui 的所有平台视口
+    if (!firstLoopState)
+        return;
+
+    firstLoopState = false;
+
+    for (int n = 0; n < platform_io.Viewports.Size; n++)
+    {
+        viewport = platform_io.Viewports[n];
+        // 确保 Platform_GetWindowFocus 已经被设置（不是 NULL）
+        // 并且该视口已经创建了实际的平台窗口
+        // 并且该视口不是 GLFW 视口
+        if (platform_io.Platform_GetWindowFocus && viewport->PlatformWindowCreated && !(viewport->Flags & ImGuiViewportFlags_OwnedByApp))
+        {
+            platform_io.Platform_SetWindowFocus(viewport);
+            break;
+        }
+    }
 }
 
 void ImGuiSetStyle() {
