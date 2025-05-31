@@ -34,14 +34,14 @@ void checkWindowFocus(ImGuiPlatformIO& platform_io, ImGuiViewport*& viewport) {
 
 void glfw_error_callback(int error, const char* description)
 {
-    fprintf(stderr, "[ERROR DETAIL] GLFW Error %d: %s\n", error, description);
+    fprintf(stderr, "[ERROR] GLFW Error %d: %s\n", error, description);
 }
 
 #ifdef _WIN32
 void SetSystemTimerResolution(DWORD resolution_ms) {
     TIMECAPS tc;
     if (timeGetDevCaps(&tc, sizeof(tc)) == MMSYSERR_NOERROR) {
-        timeBeginPeriod(min(resolution_ms, tc.wPeriodMin)); // 设置更高的计时精度时不能超过硬件支持的值
+        timeBeginPeriod(std::min(static_cast<UINT>(resolution_ms), tc.wPeriodMin)); // 设置更高的计时精度时不能超过硬件支持的值
     }
 }
 
@@ -242,7 +242,11 @@ int main()
     std::cout << "[INFO] GLFW exited." << std::endl;
 
     std::cout << "[INFO] Melosty exited." << std::endl;
+
+#ifdef _WIN32
     RestoreSystemTimerResolution();
+#endif
+
 	return 0;
 }
 
@@ -296,4 +300,11 @@ void ImGuiShow(ImGuiIO& io, GLFWwindow*& window) {
     // 设置清屏颜色（ImGui 窗口中的控制）
     // Set clear color (control from ImGui window)
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate); // 帧率信息 / Framerate info
+}
+
+void Doc_ThisIsAnimationEngineExample() {
+    // This Function will never called.
+    // This Function is a temporary documentation for using animationEngine
+    // It will be move to another place later, but for now it will be save here.
+    // Notice: All component from animationEngine are save in this namespace: "animationEngine"
 }

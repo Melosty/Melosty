@@ -15,7 +15,13 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <algorithm> // for std::min and std::max
 #include <Windows.h>
+#include <Mmsystem.h>
 #endif
+
+// --- MODULE ---
 
 // TODO: 在此处引用程序需要的其他标头。
