@@ -90,7 +90,6 @@ int main()
     // Vsync controler. 1 for on, 0 for off. Note: If enable, it will cause some delay when you move the ImGui window, don't use it!
     std::cout << "[INFO] GLFWInvisibleWindow created." << std::endl;
     std::cout << "[INFO] Vsync: Off." << std::endl;
-    std::cout << "[INFO] Max fps: " << TARGET_FPS << std::endl;
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
@@ -115,6 +114,7 @@ int main()
         TARGET_FPS = (mode->refreshRate) * 2;
         if (TARGET_FPS > 300)
             TARGET_FPS = 300;
+        std::cout << "[INFO] Max fps: " << TARGET_FPS << std::endl;
     }
     else {
         std::cerr << "[FATAL ERROR] Failed to get primary monitor." << std::endl;
@@ -157,7 +157,6 @@ int main()
     while (!glfwWindowShouldClose(window) && windowExist)
     {
         auto currentFrameStartTime = std::chrono::high_resolution_clock::now();
-
         // 处理所有待处理事件
         // Process all pending events
         glfwPollEvents();
@@ -225,7 +224,6 @@ int main()
                 std::this_thread::yield(); // 让出 CPU 时间片给其他线程
             }
         }
-        
     }
 
     // --- Cleanup ---

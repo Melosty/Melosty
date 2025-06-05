@@ -80,3 +80,7 @@ CMakeCache.txt
 .uic/
 /build*/
 .vs/
+
+# CLion / Idea
+.idea/
+cmake-build-*/
