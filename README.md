@@ -1,6 +1,10 @@
 ![!!!Icon Lost!!!](https://github.com/Melosty/Melosty/raw/refs/heads/main/Melosty_icon.png)
 # Melosty
-## W.I.P.
+> [!WARNING]
+> Pause development for a while! We need a POWERFUL engine to create GUI application!
+> 
+> We will not continue this project until [CMaterial](https://github.com/GADDQ/CMaterial) is finished.
+
 **Lightweight & Powerful Minecraft: Java Edition Launcher with Material Design 3.**
 
 ## Thanks to
